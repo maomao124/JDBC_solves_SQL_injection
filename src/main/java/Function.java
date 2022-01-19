@@ -87,10 +87,62 @@ public class Function implements Function_interface
             connection = JDBC.getConnection();
             //编写sql语句
             String sql = "select * from information where no=?";
-            //获得一个Statement对象,预编译
+            //获得一个PreparedStatement对象,预编译
             preparedStatement = connection.prepareStatement(sql);
             //传递参数
             preparedStatement.setInt(1, no);
+            //执行sql语句，返回结果集
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next())
+            {
+                Integer no1 = resultSet.getInt("no");
+                String name = resultSet.getString("name");
+                String sex = resultSet.getString("sex");
+                Integer age = resultSet.getInt("age");
+                student = new Student(no1, name, sex, age);
+            }
+        }
+        catch (SQLException e)                   //数据库异常
+        {
+            Toolkit.getDefaultToolkit().beep();
+            System.err.println("异常！异常内容为：" + e.getMessage());
+            //调试使用：
+            //e.printStackTrace();
+        }
+        catch (Exception e)                     //其它异常
+        {
+            e.printStackTrace();
+        }
+        finally                                 //关闭
+        {
+            JDBC.close(connection, preparedStatement, resultSet);
+        }
+        return student;
+    }
+
+    /**
+     * 按学号查找
+     *
+     * @param no 学号
+     * @return Student对象
+     */
+    public Student findById(String no)
+    {
+        Student student = null;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        //Statement statement = null;
+        ResultSet resultSet = null;
+        try
+        {
+            //加载驱动,获得链接,从工具类中加载
+            connection = JDBC.getConnection();
+            //编写sql语句
+            String sql = "select * from information where no=?";
+            //获得一个PreparedStatement对象,预编译
+            preparedStatement = connection.prepareStatement(sql);
+            //传递参数
+            preparedStatement.setString(1, no);
             //执行sql语句，返回结果集
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next())
@@ -131,36 +183,29 @@ public class Function implements Function_interface
     {
         int result = 0;
         Connection connection = null;
-        //PreparedStatement preparedStatement = null;
-        Statement statement = null;
+        PreparedStatement preparedStatement = null;
         try
         {
             //加载驱动,获得链接,从工具类中加载
             connection = JDBC.getConnection();
-            //创建一个Statement对象
-            statement = connection.createStatement();
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("insert into information values");
-            stringBuilder.append("('");
-            stringBuilder.append(student.getNo());
-            stringBuilder.append("','");
-            stringBuilder.append(student.getName());
-            stringBuilder.append("','");
-            stringBuilder.append(student.getSex());
-            stringBuilder.append("','");
-            stringBuilder.append(student.getAge());
-            stringBuilder.append("')");
-            String sql = stringBuilder.toString();
+            //获得一个PreparedStatement对象,预编译
+            String sql = "insert into information values(?,?,?,?)";
+            preparedStatement = connection.prepareStatement(sql);
+            //传递参数
+            preparedStatement.setInt(1, student.getNo());
+            preparedStatement.setString(2, student.getName());
+            preparedStatement.setString(3, student.getSex());
+            preparedStatement.setInt(4, student.getAge());
             //System.out.println(sql);
-            //执行sql语句，返回结果集
-            result = statement.executeUpdate(sql);
+            //执行sql语句，返回影响的行数
+            result = preparedStatement.executeUpdate();
         }
         catch (SQLException e)                   //数据库异常
         {
             Toolkit.getDefaultToolkit().beep();
             System.err.println("异常！异常内容为：" + e.getMessage());
             //调试使用：
-            //e.printStackTrace();
+            e.printStackTrace();
         }
         catch (Exception e)                     //其它异常
         {
@@ -168,7 +213,7 @@ public class Function implements Function_interface
         }
         finally                                 //关闭
         {
-            JDBC.close(connection, statement);
+            JDBC.close(connection, preparedStatement);
         }
         return result;
     }
@@ -184,30 +229,24 @@ public class Function implements Function_interface
     {
         int result = 0;
         Connection connection = null;
-        //PreparedStatement preparedStatement = null;
-        Statement statement = null;
+        PreparedStatement preparedStatement = null;
+        //Statement statement = null;
         try
         {
             //加载驱动,获得链接,从工具类中加载
             connection = JDBC.getConnection();
-            //创建一个Statement对象
-            statement = connection.createStatement();
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("update  information set ");
-            stringBuilder.append("no='");
-            stringBuilder.append(student.getNo());
-            stringBuilder.append("',name='");
-            stringBuilder.append(student.getName());
-            stringBuilder.append("',sex='");
-            stringBuilder.append(student.getSex());
-            stringBuilder.append("',age='");
-            stringBuilder.append(student.getAge());
-            stringBuilder.append("' where no=");
-            stringBuilder.append(student.getNo());
-            String sql = stringBuilder.toString();
-            System.out.println(sql);
-            //执行sql语句，返回结果
-            result = statement.executeUpdate(sql);
+            //获得一个PreparedStatement对象,预编译
+            String sql = "update information set no=?,name=?,sex=?,age=? where no=?";
+            preparedStatement = connection.prepareStatement(sql);
+            //传递参数
+            preparedStatement.setInt(1, student.getNo());
+            preparedStatement.setString(2, student.getName());
+            preparedStatement.setString(3, student.getSex());
+            preparedStatement.setInt(4, student.getAge());
+            preparedStatement.setInt(5, student.getNo());
+            //System.out.println(sql);
+            //执行sql语句，返回影响的行数
+            result = preparedStatement.executeUpdate();
         }
         catch (SQLException e)                   //数据库异常
         {
@@ -222,7 +261,7 @@ public class Function implements Function_interface
         }
         finally                                 //关闭
         {
-            JDBC.close(connection, statement);
+            JDBC.close(connection, preparedStatement);
         }
         return result;
     }
@@ -239,30 +278,24 @@ public class Function implements Function_interface
     {
         int result = 0;
         Connection connection = null;
-        //PreparedStatement preparedStatement = null;
-        Statement statement = null;
+        PreparedStatement preparedStatement = null;
+        //Statement statement = null;
         try
         {
             //加载驱动,获得链接,从工具类中加载
             connection = JDBC.getConnection();
-            //创建一个Statement对象
-            statement = connection.createStatement();
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("update  information set ");
-            stringBuilder.append("no='");
-            stringBuilder.append(student.getNo());
-            stringBuilder.append("',name='");
-            stringBuilder.append(student.getName());
-            stringBuilder.append("',sex='");
-            stringBuilder.append(student.getSex());
-            stringBuilder.append("',age='");
-            stringBuilder.append(student.getAge());
-            stringBuilder.append("' where no=");
-            stringBuilder.append(old_no);
-            String sql = stringBuilder.toString();
-            System.out.println(sql);
-            //执行sql语句，返回结果
-            result = statement.executeUpdate(sql);
+            //获得一个PreparedStatement对象,预编译
+            String sql = "update information set no=?,name=?,sex=?,age=? where no=?";
+            preparedStatement = connection.prepareStatement(sql);
+            //传递参数
+            preparedStatement.setInt(1, student.getNo());
+            preparedStatement.setString(2, student.getName());
+            preparedStatement.setString(3, student.getSex());
+            preparedStatement.setInt(4, student.getAge());
+            preparedStatement.setInt(5, old_no);
+            //System.out.println(sql);
+            //执行sql语句，返回影响的行数
+            result = preparedStatement.executeUpdate();
         }
         catch (SQLException e)                   //数据库异常
         {
@@ -277,7 +310,7 @@ public class Function implements Function_interface
         }
         finally                                 //关闭
         {
-            JDBC.close(connection, statement);
+            JDBC.close(connection, preparedStatement);
         }
         return result;
     }
@@ -293,17 +326,20 @@ public class Function implements Function_interface
     {
         int result = 0;
         Connection connection = null;
-        //PreparedStatement preparedStatement = null;
-        Statement statement = null;
+        PreparedStatement preparedStatement = null;
+        //Statement statement = null;
         try
         {
             //加载驱动,获得链接,从工具类中加载
             connection = JDBC.getConnection();
-            //创建一个Statement对象
-            statement = connection.createStatement();
-            String sql = "delete from information where no=" + no;
-            //执行sql语句，返回结果
-            result = statement.executeUpdate(sql);
+            //获得一个PreparedStatement对象,预编译
+            String sql = "delete from information where no=?";
+            preparedStatement = connection.prepareStatement(sql);
+            //传递参数
+            preparedStatement.setInt(1, no);
+            //System.out.println(sql);
+            //执行sql语句，返回影响的行数
+            result = preparedStatement.executeUpdate();
         }
         catch (SQLException e)                   //数据库异常
         {
@@ -318,13 +354,13 @@ public class Function implements Function_interface
         }
         finally                                 //关闭
         {
-            JDBC.close(connection, statement);
+            JDBC.close(connection, preparedStatement);
         }
         return result;
     }
 
     /**
-     * 排序后返回
+     * 排序后返回  无效
      *
      * @param column      按这个列排序
      * @param asc_or_desc 升序或者降序 只能输入asc或者desc
@@ -335,18 +371,21 @@ public class Function implements Function_interface
     {
         ArrayList<Student> list = new ArrayList<>();
         Connection connection = null;
-        //PreparedStatement preparedStatement = null;
-        Statement statement = null;
+        PreparedStatement preparedStatement = null;
+        //Statement statement = null;
         ResultSet resultSet = null;
         try
         {
             //加载驱动,获得链接,从工具类中加载
             connection = JDBC.getConnection();
-            //创建一个Statement对象
-            statement = connection.createStatement();
-            String sql = "select * from information order by " + column + " " + asc_or_desc;
+            String sql = "select * from information order by ? ?";
+            //获得一个preparedStatement对象，预编译
+            preparedStatement = connection.prepareStatement(sql);
+            //传递参数
+            preparedStatement.setString(1, column);
+            preparedStatement.setString(2, asc_or_desc);
             //执行sql语句，返回结果集
-            resultSet = statement.executeQuery(sql);
+            resultSet = preparedStatement.executeQuery();
             while (resultSet.next())
             {
                 Integer no = resultSet.getInt("no");
@@ -370,7 +409,7 @@ public class Function implements Function_interface
         }
         finally                                 //关闭
         {
-            JDBC.close(connection, statement, resultSet);
+            JDBC.close(connection, preparedStatement, resultSet);
         }
         return list;
     }

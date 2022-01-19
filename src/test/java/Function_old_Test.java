@@ -20,7 +20,7 @@ class Function_old_Test
     @Test
     void sort()
     {
-        ArrayList<Student> list = function_old.sort("no", "asc");
+        ArrayList<Student> list = function_old.sort("no", "desc");
         for (Student student1 : list)
         {
             System.out.print(student1);
